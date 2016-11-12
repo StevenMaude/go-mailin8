@@ -111,6 +111,9 @@ func getMail(mbxDetails mailboxDetails, cookies []*http.Cookie) error {
 	msgURL := "https://www.mailinator.com/fetchmail?msgid=" + latestMsg.ID + "&zone=public"
 	fmt.Println("Retrieving URL:", msgURL)
 	req, err := http.NewRequest("GET", msgURL, nil)
+	if err != nil {
+		return err
+	}
 
 	for _, c := range cookies {
 		req.AddCookie(c)

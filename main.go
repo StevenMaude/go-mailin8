@@ -72,9 +72,8 @@ func getMailboxDetails(localPart string) (mailboxDetails, error) {
 
 	defer resp.Body.Close()
 	err = json.NewDecoder(resp.Body).Decode(&mbxDetails)
-	if err != nil {
-		return mbxDetails, err
-	}
+	// No need for error check here as we return mbxDetails and err whether
+	// we have an error or not.
 	return mbxDetails, err
 }
 

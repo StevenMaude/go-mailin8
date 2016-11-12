@@ -77,14 +77,7 @@ func getMailboxDetails(localPart string) (mailboxDetails, error) {
 	return mbxDetails, err
 }
 
-func getCookies(mbxDetails mailboxDetails) ([]*http.Cookie, error) {
-	// TODO: consider allow to retrieve more than one message.
-	// TODO: fix panic on no messages.
-	// TODO: just pass in the single message; avoid duplication?
-	// TODO: confirm that first item is the latest message (but I think
-	// it is from previous testing of the bash script).
-	latestMsg := mbxDetails.PublicMsgs[0]
-
+func getCookies(latestMsg publicMsg) ([]*http.Cookie, error) {
 	// This request is for nothing but getting required cookies.
 	// Otherwise, the subsequent request fails.
 	inboxURL := "https://www.mailinator.com/inbox2.jsp?public_to=" + latestMsg.To
@@ -100,14 +93,7 @@ func getCookies(mbxDetails mailboxDetails) ([]*http.Cookie, error) {
 	return cookies, err
 }
 
-func getMail(mbxDetails mailboxDetails, cookies []*http.Cookie) error {
-	// TODO: consider allow to retrieve more than one message.
-	// TODO: fix panic on no messages.
-	// TODO: just pass in the single message; avoid duplication?
-	// TODO: confirm that first item is the latest message (but I think
-	// it is from previous testing of the bash script).
-	latestMsg := mbxDetails.PublicMsgs[0]
-
+func getMail(latestMsg publicMsg, cookies []*http.Cookie) error {
 	msgURL := "https://www.mailinator.com/fetchmail?msgid=" + latestMsg.ID + "&zone=public"
 	fmt.Println("Retrieving URL:", msgURL)
 	req, err := http.NewRequest("GET", msgURL, nil)
@@ -152,13 +138,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	cookies, err := getCookies(mbxDetails)
+	numberMsgs := len(mbxDetails.PublicMsgs)
+	if numberMsgs == 0 {
+		fmt.Println("no messages in inbox")
+		os.Exit(0)
+	}
+
+	latestMsg := mbxDetails.PublicMsgs[numberMsgs-1]
+
+	cookies, err := getCookies(latestMsg)
 	if err != nil {
 		fmt.Println("failed to get cookies:", err)
 		os.Exit(1)
 	}
 
-	err = getMail(mbxDetails, cookies)
+	err = getMail(latestMsg, cookies)
 	if err != nil {
 		fmt.Println("failed to get mail:", err)
 		os.Exit(1)

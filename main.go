@@ -126,6 +126,7 @@ func getMail(latestMsg publicMsg, cookies []*http.Cookie) error {
 }
 
 func main() {
+	// TODO: consider allow to retrieve more than one message.
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: mailin8 <local-part>")
 		os.Exit(1)

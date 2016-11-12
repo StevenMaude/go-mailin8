@@ -30,7 +30,6 @@ too often in a short time. See TODO.
 
 ## TODO:
 
-* Fix panics on no messages.
 * Consider introducing slight pauses between requests to try and
   improve reliability.
 * Possibly consider selecting other than latest message (though outside

@@ -121,7 +121,8 @@ func getMail(latestMsg publicMsg, cookies []*http.Cookie) error {
 
 	fmt.Println("\nFrom   :", mailMessage.Data.From)
 	fmt.Println("Subject:", mailMessage.Data.Subject)
-	fmt.Println("\n", mailMessage.Data.Parts[0].Body)
+	fmt.Println()
+	fmt.Println(mailMessage.Data.Parts[0].Body)
 	return nil
 }
 

@@ -51,14 +51,13 @@ type mail struct {
 	} `json:"data"`
 }
 
-// TODO: consider dropping most of this. Can get from the message itself.
+type publicMsg struct {
+	ID string `json:"id"`
+	To string `json:"to"`
+}
+
 type mailboxDetails struct {
-	PublicMsgs []struct {
-		FromFull string `json:"fromfull"`
-		Subject  string `json:"subject"`
-		ID       string `json:"id"`
-		To       string `json:"to"`
-	} `json:"public_msgs"`
+	PublicMsgs []publicMsg `json:"public_msgs"`
 }
 
 func getMailboxDetails(localPart string) (mailboxDetails, error) {

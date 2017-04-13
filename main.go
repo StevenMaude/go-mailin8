@@ -123,8 +123,12 @@ func getMail(latestMsg publicMsg, cookies []*http.Cookie) error {
 	fmt.Println("Subject:", mailMessage.Data.Subject)
 	fmt.Println("Plain text:")
 	fmt.Println(mailMessage.Data.Parts[0].Body)
-	fmt.Println("HTML:")
-	fmt.Println(mailMessage.Data.Parts[1].Body)
+
+	if len(mailMessage.Data.Parts) == 2 {
+		fmt.Println("HTML:")
+		fmt.Println(mailMessage.Data.Parts[1].Body)
+	}
+
 	return nil
 }
 

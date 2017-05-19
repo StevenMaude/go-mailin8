@@ -61,7 +61,7 @@ type mailboxDetails struct {
 }
 
 func getMailboxDetails(localPart string) (mailboxDetails, error) {
-	webInboxURL := "https://www.mailinator.com/api/webinbox2?x=0&public_to=" + localPart
+	webInboxURL := "https://www.mailinator.com/fetch_inbox?zone=public&to=" + localPart
 	fmt.Println("Retrieving URL:", webInboxURL)
 
 	mbxDetails := mailboxDetails{}
@@ -80,7 +80,7 @@ func getMailboxDetails(localPart string) (mailboxDetails, error) {
 func getCookies(latestMsg publicMsg) ([]*http.Cookie, error) {
 	// This request is for nothing but getting required cookies.
 	// Otherwise, the subsequent request fails.
-	inboxURL := "https://www.mailinator.com/inbox2.jsp?public_to=" + latestMsg.To
+	inboxURL := "https://www.mailinator.com/inbox2.jsp?to=" + latestMsg.To
 	fmt.Println("Retrieving URL:", inboxURL)
 
 	inboxResp, err := http.Get(inboxURL)
@@ -94,7 +94,7 @@ func getCookies(latestMsg publicMsg) ([]*http.Cookie, error) {
 }
 
 func getMail(latestMsg publicMsg, cookies []*http.Cookie) error {
-	msgURL := "https://www.mailinator.com/fetchmail?msgid=" + latestMsg.ID + "&zone=public"
+	msgURL := "https://www.mailinator.com/fetch_email?zone=public&msgid=" + latestMsg.ID
 	fmt.Println("Retrieving URL:", msgURL)
 	req, err := http.NewRequest("GET", msgURL, nil)
 	if err != nil {

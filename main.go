@@ -47,7 +47,9 @@ type mail struct {
 		Parts   []struct {
 			Body string `json:"body"`
 		} `json:"parts"`
-		From string `json:"from"`
+		Headers struct {
+			From string `json:"from"`
+		} `json:"headers"`
 	} `json:"data"`
 }
 
@@ -57,7 +59,7 @@ type publicMsg struct {
 }
 
 type mailboxDetails struct {
-	PublicMsgs []publicMsg `json:"public_msgs"`
+	PublicMsgs []publicMsg `json:"messages"`
 }
 
 func getMailboxDetails(localPart string) (mailboxDetails, error) {
@@ -119,7 +121,7 @@ func getMail(latestMsg publicMsg, cookies []*http.Cookie) error {
 		return err
 	}
 
-	fmt.Println("\nFrom   :", mailMessage.Data.From)
+	fmt.Println("\nFrom   :", mailMessage.Data.Headers.From)
 	fmt.Println("Subject:", mailMessage.Data.Subject)
 	fmt.Println("Plain text:")
 	fmt.Println(mailMessage.Data.Parts[0].Body)

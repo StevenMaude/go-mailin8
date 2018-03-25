@@ -53,22 +53,6 @@ func getMailboxDetails(localPart string) (mailboxDetails, error) {
 	return mbxDetails, err
 }
 
-func getCookies(latestMsg publicMsg) ([]*http.Cookie, error) {
-	// This request is for nothing but getting required cookies.
-	// Otherwise, the subsequent request fails.
-	inboxURL := "https://www.mailinator.com/inbox2.jsp?to=" + latestMsg.To
-	fmt.Println("Retrieving URL:", inboxURL)
-
-	inboxResp, err := http.Get(inboxURL)
-	defer inboxResp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	cookies := inboxResp.Cookies()
-	return cookies, err
-}
-
 func getMail(latestMsg publicMsg, cookies []*http.Cookie) error {
 	msgURL := "https://www.mailinator.com/fetch_email?zone=public&msgid=" + latestMsg.ID
 	fmt.Println("Retrieving URL:", msgURL)
@@ -149,12 +133,6 @@ func main() {
 
 	// latestMsg := mbxDetails.PublicMsgs[numberMsgs-1]
 
-	//cookies, err := getCookies(latestMsg)
-	//if err != nil {
-	//	fmt.Println("failed to get cookies:", err)
-	//	os.Exit(1)
-	//}
-	//
 	//	err = getMail(latestMsg, cookies)
 	//	if err != nil {
 	//		fmt.Println("failed to get mail:", err)

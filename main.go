@@ -8,15 +8,10 @@ import (
 )
 
 type mail struct {
-	Data struct {
-		Subject string `json:"subject"`
-		Parts   []struct {
-			Body string `json:"body"`
-		} `json:"parts"`
-		Headers struct {
-			From string `json:"from"`
-		} `json:"headers"`
-	} `json:"data"`
+	From    string `json:"f"`
+	Subject string `json:"s"`
+	HTML    string `json:"html"`
+	Text    string `json:"text"`
 }
 
 type publicMsg struct {
@@ -53,41 +48,31 @@ func getMailboxDetails(localPart string) (mailboxDetails, error) {
 	return mbxDetails, err
 }
 
-func getMail(latestMsg publicMsg, cookies []*http.Cookie) error {
-	msgURL := "https://www.mailinator.com/fetch_email?zone=public&msgid=" + latestMsg.ID
+func getMail(latestMsg msg) error {
+	msgURL := "https://getnada.com/api/v1/messages/" + latestMsg.UID
 	fmt.Println("Retrieving URL:", msgURL)
-	req, err := http.NewRequest("GET", msgURL, nil)
+
+	resp, err := http.Get(msgURL)
 	if err != nil {
 		return err
 	}
 
-	for _, c := range cookies {
-		req.AddCookie(c)
-	}
-
-	client := &http.Client{}
-
-	mailResp, err := client.Do(req)
-	defer mailResp.Body.Close()
-	if err != nil {
-		return err
-	}
+	// TODO: move out display of mail from getting mail.
+	defer resp.Body.Close()
 
 	mailMessage := mail{}
-	err = json.NewDecoder(mailResp.Body).Decode(&mailMessage)
+	err = json.NewDecoder(resp.Body).Decode(&mailMessage)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("\nFrom   :", mailMessage.Data.Headers.From)
-	fmt.Println("Subject:", mailMessage.Data.Subject)
+	fmt.Println("\nFrom   :", mailMessage.From)
+	fmt.Println("Subject:", mailMessage.Subject)
 	fmt.Println("Plain text:")
-	fmt.Println(mailMessage.Data.Parts[0].Body)
+	fmt.Println(mailMessage.Text)
 
-	if len(mailMessage.Data.Parts) == 2 {
-		fmt.Println("HTML:")
-		fmt.Println(mailMessage.Data.Parts[1].Body)
-	}
+	fmt.Println("HTML:")
+	fmt.Println(mailMessage.HTML)
 
 	return nil
 }
@@ -123,19 +108,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println(addressInbox)
 	numberMsgs := len(addressInbox.Msgs)
 	if numberMsgs == 0 {
 		fmt.Println("no messages in inbox")
 		os.Exit(0)
 	}
-	fmt.Println(numberMsgs)
+	fmt.Println("Found", numberMsgs, "messages")
 
-	// latestMsg := mbxDetails.PublicMsgs[numberMsgs-1]
-
-	//	err = getMail(latestMsg, cookies)
-	//	if err != nil {
-	//		fmt.Println("failed to get mail:", err)
-	//		os.Exit(1)
-	//	}
+	latestMsg := addressInbox.Msgs[0]
+	err = getMail(latestMsg)
+	if err != nil {
+		fmt.Println("failed to get mail:", err)
+		os.Exit(1)
+	}
 }

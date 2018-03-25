@@ -14,38 +14,12 @@ type mail struct {
 	Text    string `json:"text"`
 }
 
-type publicMsg struct {
-	ID string `json:"id"`
-	To string `json:"to"`
-}
-
-type mailboxDetails struct {
-	PublicMsgs []publicMsg `json:"messages"`
-}
-
 type msg struct {
 	UID string `json:"uid"`
 }
 
 type inbox struct {
 	Msgs []msg `json:"msgs"`
-}
-
-func getMailboxDetails(localPart string) (mailboxDetails, error) {
-	webInboxURL := "https://www.mailinator.com/fetch_inbox?zone=public&to=" + localPart
-	fmt.Println("Retrieving URL:", webInboxURL)
-
-	mbxDetails := mailboxDetails{}
-	resp, err := http.Get(webInboxURL)
-	if err != nil {
-		return mbxDetails, err
-	}
-
-	defer resp.Body.Close()
-	err = json.NewDecoder(resp.Body).Decode(&mbxDetails)
-	// No need for error check here as we return mbxDetails and err whether
-	// we have an error or not.
-	return mbxDetails, err
 }
 
 func getMail(latestMsg msg) error {

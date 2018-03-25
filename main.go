@@ -97,7 +97,7 @@ func getInbox(address string) (inbox, error) {
 func main() {
 	// TODO: consider allow to retrieve more than one message.
 	if len(os.Args) != 2 {
-		fmt.Println("Usage: mailin8 <local-part>")
+		fmt.Println("Usage: mailin8 <address>")
 		os.Exit(1)
 	}
 

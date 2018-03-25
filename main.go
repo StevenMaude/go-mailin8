@@ -28,6 +28,14 @@ type mailboxDetails struct {
 	PublicMsgs []publicMsg `json:"messages"`
 }
 
+type msg struct {
+	UID string `json:"uid"`
+}
+
+type inbox struct {
+	Msgs []msg `json:"msgs"`
+}
+
 func getMailboxDetails(localPart string) (mailboxDetails, error) {
 	webInboxURL := "https://www.mailinator.com/fetch_inbox?zone=public&to=" + localPart
 	fmt.Println("Retrieving URL:", webInboxURL)
@@ -100,6 +108,23 @@ func getMail(latestMsg publicMsg, cookies []*http.Cookie) error {
 	return nil
 }
 
+func getInbox(address string) (inbox, error) {
+	webInboxURL := "https://getnada.com/api/v1/inboxes/" + address
+	fmt.Println("Retrieving URL:", webInboxURL)
+
+	addressInbox := inbox{}
+	resp, err := http.Get(webInboxURL)
+	if err != nil {
+		return addressInbox, err
+	}
+
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&addressInbox)
+	// No need for error check here as we return mbxDetails and err whether
+	// we have an error or not.
+	return addressInbox, err
+}
+
 func main() {
 	// TODO: consider allow to retrieve more than one message.
 	if len(os.Args) != 2 {
@@ -107,30 +132,32 @@ func main() {
 		os.Exit(1)
 	}
 
-	localPart := os.Args[1]
-	mbxDetails, err := getMailboxDetails(localPart)
+	address := os.Args[1]
+	addressInbox, err := getInbox(address)
 	if err != nil {
 		fmt.Println("failed to get message ID:", err)
 		os.Exit(1)
 	}
 
-	numberMsgs := len(mbxDetails.PublicMsgs)
+	fmt.Println(addressInbox)
+	numberMsgs := len(addressInbox.Msgs)
 	if numberMsgs == 0 {
 		fmt.Println("no messages in inbox")
 		os.Exit(0)
 	}
+	fmt.Println(numberMsgs)
 
-	latestMsg := mbxDetails.PublicMsgs[numberMsgs-1]
+	// latestMsg := mbxDetails.PublicMsgs[numberMsgs-1]
 
-	cookies, err := getCookies(latestMsg)
-	if err != nil {
-		fmt.Println("failed to get cookies:", err)
-		os.Exit(1)
-	}
-
-	err = getMail(latestMsg, cookies)
-	if err != nil {
-		fmt.Println("failed to get mail:", err)
-		os.Exit(1)
-	}
+	//cookies, err := getCookies(latestMsg)
+	//if err != nil {
+	//	fmt.Println("failed to get cookies:", err)
+	//	os.Exit(1)
+	//}
+	//
+	//	err = getMail(latestMsg, cookies)
+	//	if err != nil {
+	//		fmt.Println("failed to get mail:", err)
+	//		os.Exit(1)
+	//	}
 }

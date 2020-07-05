@@ -20,7 +20,13 @@ email service.
 
 ## Build
 
+### With Go installed
+
 `go build`
+
+### With Docker installed
+
+`make`
 
 ## Usage
 

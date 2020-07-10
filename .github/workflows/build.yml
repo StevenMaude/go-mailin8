@@ -20,4 +20,4 @@ jobs:
 
       - name: Run code
         run: |
-          ./go-mailin8 | grep "Usage: mailin8 <address>"
+          ./go-mailin8 | grep "Usage: go-mailin8 <address>"

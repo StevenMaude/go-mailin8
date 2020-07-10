@@ -14,6 +14,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Run go vet
+        run: |
+          go vet ./...
+
       - name: Build code
         run: |
           make build

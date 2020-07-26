@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 type mail struct {
@@ -85,7 +86,7 @@ func getInbox(address string) (inbox, error) {
 func main() {
 	// TODO: consider allow to retrieve more than one message.
 	if len(os.Args) != 2 {
-		fmt.Println("Usage: go-mailin8 <address>")
+		fmt.Printf("Usage: %v <address>\n", filepath.Base(os.Args[0]))
 		os.Exit(1)
 	}
 

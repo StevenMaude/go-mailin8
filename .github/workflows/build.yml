@@ -20,8 +20,8 @@ jobs:
 
       - name: Build code
         run: |
-          make build
+          make build-linux
 
       - name: Run code
         run: |
-          ./go-mailin8 | grep "Usage: go-mailin8 <address>"
+          ./go-mailin8_linux_amd64 | grep "Usage: go-mailin8_linux_amd64 <address>"

@@ -41,8 +41,3 @@ from tagged versions via GitHub Actions.
    address of your choosing.
 2. Run the binary supplying `<email address>` as an argument, e.g.
    `go-mailin8_linux_amd64 <email_address>`
-
-## TODO:
-
-* Possibly consider selecting other than latest message (though outside
-  of my original use case).

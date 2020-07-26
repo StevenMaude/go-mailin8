@@ -20,19 +20,27 @@ email service.
 
 ## Build
 
+### Download
+
+If you don't want to build from source, [Linux and Windows
+binaries](https://github.com/StevenMaude/go-mailin8/releases) are built
+from tagged versions via GitHub Actions.
+
 ### With Go installed
 
-`go build`
+`go build` or `go install`
 
 ### With Docker installed
 
-`make`
+* `make build-linux` (for a Linux build)
+* `make build-windows` (for a Windows build)
 
 ## Usage
 
 1. Send, or get an email sent to a [nada](https://getnada.com) email
    address of your choosing.
-2. Run `go-mailin8 <email address>`
+2. Run the binary supplying `<email address>` as an argument, e.g.
+   `go-mailin8_linux_amd64 <email_address>`
 
 ## TODO:
 

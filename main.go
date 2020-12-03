@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type mail struct {
@@ -35,6 +36,12 @@ type msg struct {
 
 type inbox struct {
 	Msgs []msg `json:"msgs"`
+}
+
+func newHTTPClient() *http.Client {
+	return &http.Client{
+		Timeout: 20 * time.Second,
+	}
 }
 
 func getMail(latestMsg msg) error {

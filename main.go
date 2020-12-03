@@ -17,16 +17,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
-type mail struct {
+type mailHeader struct {
 	From    string `json:"f"`
 	Subject string `json:"s"`
-	HTML    string `json:"html"`
-	Text    string `json:"text"`
 }
 
 type msg struct {
@@ -37,41 +37,58 @@ type inbox struct {
 	Msgs []msg `json:"msgs"`
 }
 
-func getMail(latestMsg msg) error {
-	msgURL := "https://getnada.com/api/v1/messages/" + latestMsg.UID
-	fmt.Println("Retrieving URL:", msgURL)
-
-	resp, err := http.Get(msgURL)
-	if err != nil {
-		return err
+func newHTTPClient() *http.Client {
+	return &http.Client{
+		Timeout: 20 * time.Second,
 	}
+}
 
-	// TODO: move out display of mail from getting mail.
+func getMailHeader(latestMsg msg) (mailHeader, error) {
+	msgURL := "https://getnada.com/api/v1/messages/" + latestMsg.UID
+	fmt.Println("Retrieving message URL:", msgURL)
+	var mh mailHeader
+
+	c := newHTTPClient()
+	resp, err := c.Get(msgURL)
+	if err != nil {
+		return mh, err
+	}
 	defer resp.Body.Close()
 
-	mailMessage := mail{}
-	err = json.NewDecoder(resp.Body).Decode(&mailMessage)
+	err = json.NewDecoder(resp.Body).Decode(&mh)
 	if err != nil {
-		return err
+		return mh, err
 	}
 
-	fmt.Println("\nFrom   :", mailMessage.From)
-	fmt.Println("Subject:", mailMessage.Subject)
-	fmt.Println("Plain text:")
-	fmt.Println(mailMessage.Text)
+	return mh, nil
+}
 
-	fmt.Println("HTML:")
-	fmt.Println(mailMessage.HTML)
+func getMailBody(latestMsg msg) (string, error) {
+	htmlURL := "https://getnada.com/api/v1/messages/html/" + latestMsg.UID
+	fmt.Println("Retrieving HTML", htmlURL)
 
-	return nil
+	c := newHTTPClient()
+	htmlResp, err := c.Get(htmlURL)
+	if err != nil {
+		return "", err
+	}
+	defer htmlResp.Body.Close()
+
+	html, err := ioutil.ReadAll(htmlResp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(html), nil
 }
 
 func getInbox(address string) (inbox, error) {
 	webInboxURL := "https://getnada.com/api/v1/inboxes/" + address
 	fmt.Println("Retrieving URL:", webInboxURL)
 
-	addressInbox := inbox{}
-	resp, err := http.Get(webInboxURL)
+	var addressInbox inbox
+	c := newHTTPClient()
+	resp, err := c.Get(webInboxURL)
 	if err != nil {
 		return addressInbox, err
 	}
@@ -104,10 +121,21 @@ func main() {
 	}
 	fmt.Println("Found", numberMsgs, "messages")
 
-	latestMsg := addressInbox.Msgs[0]
-	err = getMail(latestMsg)
+	latestMsgID := addressInbox.Msgs[0]
+	mh, err := getMailHeader(latestMsgID)
+	if err != nil {
+		fmt.Println("failed to get message metadate", err)
+		os.Exit(1)
+	}
+
+	mb, err := getMailBody(latestMsgID)
 	if err != nil {
 		fmt.Println("failed to get mail:", err)
 		os.Exit(1)
 	}
+
+	fmt.Println("From   :", mh.From)
+	fmt.Println("Subject:", mh.Subject)
+	fmt.Println("HTML:")
+	fmt.Println(mb)
 }

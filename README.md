@@ -1,6 +1,6 @@
 # go-mailin8
 
-Display the latest mail from a temporary [nada](https://getnada.com)
+Display the latest mail from a temporary [inboxes.com](https://inboxes.com)
 email address, at the command line.
 
 Useful for getting confirmation emails for throwaway purposes, or for
@@ -37,7 +37,7 @@ from tagged versions via GitHub Actions.
 
 ## Usage
 
-1. Send, or get an email sent to a [nada](https://getnada.com) email
+1. Send, or get an email sent to an [inboxes.com](https://inboxes.com) email
    address of your choosing.
 2. Run the binary supplying `<email address>` as an argument, e.g.
    `go-mailin8_linux_amd64 <email_address>`

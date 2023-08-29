@@ -17,7 +17,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -29,12 +28,20 @@ type mailHeader struct {
 	Subject string `json:"s"`
 }
 
-type msg struct {
+type msgPreview struct {
 	UID string `json:"uid"`
 }
 
+type msg struct {
+	UID     string `json:"uid"`
+	From    string `json:"f"`
+	Subject string `json:"s"`
+	HTML    string `json:"html"`
+	Text    string `json:"text"`
+}
+
 type inbox struct {
-	Msgs []msg `json:"msgs"`
+	MsgPreviews []msgPreview `json:"msgs"`
 }
 
 func newHTTPClient() *http.Client {
@@ -43,47 +50,32 @@ func newHTTPClient() *http.Client {
 	}
 }
 
-func getMailHeader(latestMsg msg) (mailHeader, error) {
-	msgURL := "https://getnada.com/api/v1/messages/" + latestMsg.UID
+func getMailMsg(latestMsgPreview msgPreview) (msg, error) {
+	msgURL := "https://inboxes.com/api/v2/message/" + latestMsgPreview.UID
 	fmt.Println("Retrieving message URL:", msgURL)
-	var mh mailHeader
+	var m msg
 
 	c := newHTTPClient()
 	resp, err := c.Get(msgURL)
 	if err != nil {
-		return mh, err
+		return m, err
 	}
 	defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(&mh)
+	err = json.NewDecoder(resp.Body).Decode(&m)
 	if err != nil {
-		return mh, err
+		return m, err
 	}
 
-	return mh, nil
-}
-
-func getMailBody(latestMsg msg) (string, error) {
-	htmlURL := "https://getnada.com/api/v1/messages/html/" + latestMsg.UID
-	fmt.Println("Retrieving HTML", htmlURL)
-
-	c := newHTTPClient()
-	htmlResp, err := c.Get(htmlURL)
-	if err != nil {
-		return "", err
-	}
-	defer htmlResp.Body.Close()
-
-	html, err := ioutil.ReadAll(htmlResp.Body)
-	if err != nil {
-		return "", err
+	if latestMsgPreview.UID != m.UID {
+		return m, fmt.Errorf("UID of preview %s and mail %s do not match", latestMsgPreview.UID, m.UID)
 	}
 
-	return string(html), nil
+	return m, nil
 }
 
 func getInbox(address string) (inbox, error) {
-	webInboxURL := "https://getnada.com/api/v1/inboxes/" + address
+	webInboxURL := "https://inboxes.com/api/v2/inbox/" + address
 	fmt.Println("Retrieving URL:", webInboxURL)
 
 	var addressInbox inbox
@@ -114,28 +106,24 @@ func main() {
 		os.Exit(1)
 	}
 
-	numberMsgs := len(addressInbox.Msgs)
+	numberMsgs := len(addressInbox.MsgPreviews)
 	if numberMsgs == 0 {
 		fmt.Println("no messages in inbox")
 		os.Exit(0)
 	}
 	fmt.Println("Found", numberMsgs, "messages")
 
-	latestMsgID := addressInbox.Msgs[0]
-	mh, err := getMailHeader(latestMsgID)
+	latestMsgID := addressInbox.MsgPreviews[0]
+	msg, err := getMailMsg(latestMsgID)
 	if err != nil {
-		fmt.Println("failed to get message metadate", err)
+		fmt.Println("failed to get message", err)
 		os.Exit(1)
 	}
 
-	mb, err := getMailBody(latestMsgID)
-	if err != nil {
-		fmt.Println("failed to get mail:", err)
-		os.Exit(1)
-	}
-
-	fmt.Println("From   :", mh.From)
-	fmt.Println("Subject:", mh.Subject)
+	fmt.Println("From   :", msg.From)
+	fmt.Println("Subject:", msg.Subject)
+	fmt.Println("Text:")
+	fmt.Println(msg.Text)
 	fmt.Println("HTML:")
-	fmt.Println(mb)
+	fmt.Println(msg.HTML)
 }
